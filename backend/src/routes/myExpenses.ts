@@ -74,7 +74,7 @@ router.get("/", verifyToken, async (req: Request, res: Response) => {
                 { payer: email }, // User is the primary user, this is actually useless at the momenth because payer is creating user and is always in the others array, but it could change
                 { "others.email": email } // User is in the "others" array
             ]
-        });
+        }).sort({date: "desc"});
 
         return res.status(200).json(expenses);
     } catch (e) {
@@ -113,7 +113,7 @@ router.get('/search', verifyToken, async (req: Request, res: Response) => {
                     ]
                 }
             ]
-        });
+        }).sort({date:"desc"});
 
         return res.status(200).json(expenses);
     } catch (e) {
@@ -187,7 +187,7 @@ router.get("/:year/:month", verifyToken, async (req: Request, res: Response) => 
                 $gte: startDate,
                 $lte: endDate
             }
-        });
+        }).sort({date:"desc"});
 
         return res.status(200).json(expenses);
     } catch (e) {
@@ -220,7 +220,7 @@ router.get("/:year", verifyToken, async (req: Request, res: Response) => {
                 $gte: startDate,
                 $lt: endDate
             }
-        });
+        }).sort({date:"desc"});
 
         return res.status(200).json(expenses);
     } catch (e) {

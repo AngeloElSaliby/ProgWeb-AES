@@ -17,8 +17,9 @@ const calculateBalance = (expenses: ExpenseType[], userEmail: string, otherUser:
             // User is the creator of the expense
             for (const participant of expense.others) {
                 if (participant.email !== userEmail) {
-                    if(otherUser === "" || otherUser === participant.email){
-                    owedToUser += participant.amount;}
+                    if (otherUser === "" || otherUser === participant.email) {
+                        owedToUser += participant.amount;
+                    }
                 }
             }
         } else {
@@ -36,29 +37,32 @@ const calculateBalance = (expenses: ExpenseType[], userEmail: string, otherUser:
     };
 };
 
+
+
 // Get balance
-router.get("/:email", verifyToken, async (req: Request, res :Response) =>{
-    try{
-    const userEmail = req.email;
-    const {email} = req.params;
+router.get("/:email", verifyToken, async (req: Request, res: Response) => {
+    try {
+        const userEmail = req.email;
+        const { email } = req.params;
 
-    const paidByMe = await Expense.find({$and : [{ payer: userEmail }, {"others.email": email}]});
+        const paidByMe = await Expense.find({ $and: [{ payer: userEmail }, { "others.email": email }] });
 
-    const paidByThem = await Expense.find({
-        $and: [
-            { payer: email }, // Creator is someone else
-            { "others.email": userEmail }      // Logged-in user is in the "others" array
-        ]
-    });
+        const paidByThem = await Expense.find({
+            $and: [
+                { payer: email }, // Creator is someone else
+                { "others.email": userEmail }      // Logged-in user is in the "others" array
+            ]
+        });
 
-    const balance = calculateBalance([...paidByMe, ...paidByThem], userEmail, email)
+        const balance = calculateBalance([...paidByMe, ...paidByThem], userEmail, email)
 
-    res.status(200).json(balance).send();}
-    catch(e){
+        res.status(200).json(balance).send();
+    }
+    catch (e) {
         console.error(`Error fetching balance against ${req.params.email}`, e);
         res.status(500).json({ message: `Something went wrong fetching the balance against ${req.params.email}` });
     }
-    
+
 })
 
 router.get("/", verifyToken, async (req: Request, res: Response) => {
@@ -76,12 +80,11 @@ router.get("/", verifyToken, async (req: Request, res: Response) => {
             ]
         });
 
-        // Calculate global balance
-        const globalBalance = calculateBalance([...paidByMe, ...paidByOthers], userEmail, "");
+
 
         // Find all users that have at least one expense with the logged-in user
         const otherUsersIds = new Set([...paidByMe.flatMap(exp => [exp.payer, ...exp.others.map(o => o.email)]), //flatMap to merge all the arrays we get back
-                                       ...paidByOthers.flatMap(exp => [exp.payer, ...exp.others.map(o => o.email)])]);
+        ...paidByOthers.flatMap(exp => [exp.payer, ...exp.others.map(o => o.email)])]);
         otherUsersIds.delete(userEmail); // Remove the current user from the list, it is always in the others array
 
         const users = await User.find({ email: { $in: Array.from(otherUsersIds) } });
@@ -98,10 +101,24 @@ router.get("/", verifyToken, async (req: Request, res: Response) => {
             };
         }));
 
+        // Calculate global balance
+        let globalBalance = { owedToUser: 0, owedByUser: 0 };
+        for (const userBalance of userBalances) {
+            const owedToUser = parseFloat(userBalance.balance.owedToUser);
+            const owedByUser = parseFloat(userBalance.balance.owedByUser);
+            if (owedToUser - owedByUser > 0) { //User is owed 
+                globalBalance.owedToUser += owedToUser - owedByUser
+            } else {
+                globalBalance.owedByUser += owedByUser - owedToUser
+            }
+        }
+
+
+
         // Add global balance to the response
         userBalances.push({
             with: 'all',
-            balance: globalBalance
+            balance: { owedByUser: globalBalance.owedByUser.toFixed(2), owedToUser: globalBalance.owedToUser.toFixed(2) }
         });
 
         // Return the computed balances
