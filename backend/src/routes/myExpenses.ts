@@ -1,3 +1,7 @@
+// expenses api endpoints (/api/budget)
+// post on  ./, delete, post on ./:year/:month/:id, get on ./search?q=query
+// get on ./, ./:year, ./:year/:month, ./:year/:month/:id
+
 import express, { Request, Response } from "express";
 import Expense, { ExpenseType } from "../models/expense";
 import verifyToken from "../middleware/auth";
@@ -6,6 +10,7 @@ import User from "../models/user";
 
 const router = express.Router();
 
+//Maybe there is a way to integrate this in the mongoose schema?
 const usersExist = async (others:{email:string, amount:number}[]) =>{
     for( const other of others){
         const exists = await User.findOne({email: other.email});
@@ -38,7 +43,9 @@ router.post("/",
             await expense.save();
 
             res.status(201).send(expense);
-        } catch (e) {
+
+            //catch db errors and formulate response accordingly, now some invalid requests give a 500 status
+        } catch (e) { 
             console.log("Error creating expense:", e);
             res.status(500).json({ message: "Something went wrong creating the expense" });
         }
@@ -49,10 +56,10 @@ router.get("/", verifyToken, async (req: Request, res: Response) => {
     try {
         const email = req.email;
 
-        // Find expenses where the email is the logged-in user's ID or where the "others" array contains an object with the user's ID
+        // Find expenses where requiring user is participating
         const expenses = await Expense.find({
             $or: [
-                { email: email }, // User is the primary user, this is actually useless
+                { payer: email }, // User is the primary user, this is actually useless at the momenth because payer is creating user and is always in the others array, but it could change
                 { "others.email": email } // User is in the "others" array
             ]
         });
@@ -67,6 +74,7 @@ router.get("/", verifyToken, async (req: Request, res: Response) => {
 router.get('/search', verifyToken, async (req: Request, res: Response) => {
     const {q} = req.query;
     console.log(`Got a get request on /search?=${q}`)
+
     // Error if no query parameter is provided
     if (!q || typeof q !== 'string') {
         return res.status(400).json({ message: "Query parameter 'q' is required and must be a string." });
@@ -129,7 +137,7 @@ router.get("/:year/:month/:id", verifyToken, async (req: Request, res: Response)
         });
 
         if (!expense) {
-            return res.status(404).json({ message: 'Expense not found for this month and year, or you are not the creating user' });
+            return res.status(404).json({ message: 'Expense not found for this month and year, or you are not a partecipating user in the expense' });
         }
 
         res.status(200).json(expense);
@@ -243,7 +251,7 @@ router.put('/:year/:month/:id', verifyToken, async (req: Request, res: Response)
         expense.date = date ? new Date(date) : expense.date; 
         expense.category = category || expense.category;
 
-        // Update the lastUpdated field
+        // Update the lastUpdated field, could be useless after implementation in mongoose schema
         expense.lastUpdated = new Date();  
 
         // Save the updated expense
@@ -279,7 +287,7 @@ router.delete("/:year/:month/:id", verifyToken, async (req: Request, res: Respon
             "others.email": req.email, // Ensure the expense belongs to the logged-in user
             date: {
                 $gte: startDate,
-                $lt: endDate, // Ensure it's within the month
+                $lt: endDate, // Ensure it's within the year-month provided
             },
         });
 

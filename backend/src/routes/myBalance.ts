@@ -1,3 +1,5 @@
+// balance/, balance/:user  api endpoints
+
 import express, { Request, Response } from "express";
 import Expense, { ExpenseType } from "../models/expense";
 import User from "../models/user";

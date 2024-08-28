@@ -1,3 +1,7 @@
+// post ./register
+//get ./ for full user list
+//Should implement friendlists and avoid exposing all usernames
+
 import express, {Request, Response} from "express";
 import User from "../models/user";
 import jwt from "jsonwebtoken";

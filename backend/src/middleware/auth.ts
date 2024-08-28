@@ -3,7 +3,7 @@
 import { NextFunction, Request, Response} from "express";
 import jwt, { JwtPayload } from "jsonwebtoken";
 
-declare global { //add userId property to Request type of express
+declare global { //add email property to Request type of express
     namespace Express{
         interface Request{
             email: string;

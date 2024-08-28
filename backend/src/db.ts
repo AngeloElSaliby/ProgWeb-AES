@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-const mongoUri = process.env.MONGO_URI || 'mongodb://localhost:27017/splittify';
+const mongoUri = process.env.MONGO_URI || 'mongodb://localhost:27017/splittify';  //mainly for docker deployment
 
 let cachedDB: mongoose.Connection | null = null;
 

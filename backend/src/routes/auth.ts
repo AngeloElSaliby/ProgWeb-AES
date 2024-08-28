@@ -1,3 +1,5 @@
+//login, logout, whoami api endpoints
+
 import express, {Request, Response} from "express";
 import { check, validationResult } from "express-validator";
 import User from "../models/user";
@@ -64,7 +66,9 @@ router.post("/logout", (req:Request, res: Response) =>{
     res.send();
 })
 
-
+//Currently being used on frontend for cheking if user is logged in,
+//to clear console it would be better to create a different endpoint that 
+//does not respond with an unauthorized code.
 router.get("/whoami", verifyToken, (req: Request,res: Response) =>{
     res.status(200).json({email:req.email}) //added by verifyToken
 })

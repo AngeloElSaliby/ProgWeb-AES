@@ -1,3 +1,6 @@
+//At the moment shows all expenses in a single scroll,
+//implement "show more" button
+
 import React, { useEffect, useState } from 'react';
 import { useQuery } from 'react-query';
 import { useAppContext } from '../contexts/AppContext';

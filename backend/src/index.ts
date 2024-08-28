@@ -15,7 +15,7 @@ import User from './models/user';
 
 
 
-// Correctly configure dotenv
+// Correctly configure dotenv, this is being used in deployment
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 //Initialize express and basic request parsing
@@ -26,9 +26,11 @@ app.use(express.urlencoded({extended: true}));
 app.use(cookieParser());
 
 let db: mongoose.Connection | null = null;
-let isConnecting = false;
+let isConnecting = false; 
+
 // Initialize database
 const initializeDB = async () => {
+  //prevent connection flood
   if(isConnecting){
     console.log("DB: waiting for previous connection attempt to end")
     return;
@@ -57,7 +59,7 @@ const initializeDB = async () => {
 initializeDB() //first try before any request
 
 
-
+//Userful in development
 //dotenv configuration test
 // app.get('/test-env', (req, res) => {
 //     res.json({
@@ -68,7 +70,12 @@ initializeDB() //first try before any request
 //     });
 //   });
 
-//Handle db not connected
+
+
+//api routes
+app.use(express.static(path.join(__dirname, "../../frontend/build"))) //let the backend serve the static build of react
+//Handle db not connected, positioned here so that it is placed in the frontend context instead of json in browser
+//Does not handle frontend refresh with db down
 app.use("/*", (req,res, next)=> {
 
   if(!db){
@@ -78,14 +85,12 @@ app.use("/*", (req,res, next)=> {
   else {next();}
 })
 
-//api routes
-app.use(express.static(path.join(__dirname, "../../frontend/build"))) //let the backend serve the static build of react
 app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/budget", myExpenses);
 app.use("/api/balance", myBalance);
 
-app.use("/*", (req, res) => {
+app.use("/*", (req, res) => { //Fixing refresh on frontend, if not any other endpoint serve react build 
   res.sendFile(path.join(__dirname, "../../frontend/build/index.html"));
 });
 

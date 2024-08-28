@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useAppContext } from "../contexts/AppContext";
 import SignOutButton from "./SignOutButton"; //Moved to not overcrowd header, might be better to use dropdown menu on small screens
+//Keeping it here because SignOut in footer is not ideal
 
 const Header = () => {
     const { isLoggedIn } = useAppContext();

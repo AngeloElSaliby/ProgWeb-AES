@@ -1,4 +1,6 @@
 //The context is a collection of properties we want to expose to our components
+//It might be smart to change isLoggedIn to the user email/id/username as to not fetch it uselessly
+//Backend is already sending username back in response after authentication
 
 import React, { useContext, useState } from "react";
 import Toast from "../components/Toast";

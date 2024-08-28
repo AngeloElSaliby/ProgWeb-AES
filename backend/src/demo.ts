@@ -557,7 +557,8 @@ export const populateDB = async () => {
         }
 
         // Add expenses
-        await Expense.insertMany(expenses);
+        await Expense.insertMany(expenses);  //This does not call presave, maybe can use create() on array. 
+        //Must be fixed before implementing presave autoupdate of lastUpdated field in shcema
         console.log("Expenses added to the database.");
         const allUsesrs = await User.find({});
         console.log(allUsesrs);
