@@ -31,6 +31,18 @@ router.post("/",
     ],
     async (req: Request, res: Response) => {
         try {
+            let isDate = new Date()
+            let parsedYear:number;
+            try{
+                isDate = new Date(req.body.date);
+                parsedYear = parseInt(req.body.date.split("-")[0]);
+                if(parsedYear < 1970 || parsedYear> 9999){
+                    return res.status(400).json({message: "Year is invalid, must be between 1970 and 9999"})
+                }
+            }catch(e){
+                return res.status(400).json({message : "Date is invalid. Provide YYYY-MM-DD and 999<YYYY<9999"})
+            }
+
             const userAreValid = await usersExist(req.body.others)
             if(!userAreValid){
                 return res.status(400).json({message:"Cannot add expense against unregistered users"})
@@ -47,7 +59,7 @@ router.post("/",
             //catch db errors and formulate response accordingly, now some invalid requests give a 500 status
         } catch (e) { 
             console.error("Error creating expense:", e);
-            res.status(500).json({ message: "Something went wrong creating the expense" });
+            return res.status(500).json({ message: "Something went wrong creating the expense" });
         }
     }
 );
@@ -64,10 +76,10 @@ router.get("/", verifyToken, async (req: Request, res: Response) => {
             ]
         });
 
-        res.status(200).json(expenses);
+        return res.status(200).json(expenses);
     } catch (e) {
         console.error("Error fetching expenses:", e);
-        res.status(500).json({ message: "Something went wrong fetching the expenses" });
+        return res.status(500).json({ message: "Something went wrong fetching the expenses" });
     }
 });
 
@@ -103,10 +115,10 @@ router.get('/search', verifyToken, async (req: Request, res: Response) => {
             ]
         });
 
-        res.status(200).json(expenses);
+        return res.status(200).json(expenses);
     } catch (e) {
         console.error("Error searching expenses:", e);
-        res.status(500).json({ message: "Something went wrong searching the expenses" });
+        return res.status(500).json({ message: "Something went wrong searching the expenses" });
     }
 });
 
@@ -123,7 +135,7 @@ router.get("/:year/:month/:id", verifyToken, async (req: Request, res: Response)
         }catch (e){
             console.error(`Recieved as year: ${year}, as month: ${month}, as id:${id}. Computed: startDate:${startDate}, endDate: ${endDate}`);
             console.error(e);
-            res.status(400).json({message: "Year or month are invalid."});
+            return res.status(400).json({message: "Year or month are invalid."});
         }
         if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
             return res.status(400).json({message: "Year or month are invalid."})
@@ -143,10 +155,10 @@ router.get("/:year/:month/:id", verifyToken, async (req: Request, res: Response)
             return res.status(404).json({ message: 'Expense not found for this month and year, or you are not a partecipating user in the expense' });
         }
 
-        res.status(200).json(expense);
+        return res.status(200).json(expense);
     } catch (e) {
         console.error("Error fetching expenses:", e);
-        res.status(500).json({ message: "Something went wrong fetching the expenses" });
+        return res.status(500).json({ message: "Something went wrong fetching the expenses" });
     }
 });
 
@@ -177,10 +189,10 @@ router.get("/:year/:month", verifyToken, async (req: Request, res: Response) => 
             }
         });
 
-        res.status(200).json(expenses);
+        return res.status(200).json(expenses);
     } catch (e) {
         console.error(`Error fetching expenses at ${req.protocol}://${req.get('host')}${req.originalUrl}. Got the following error:`, e);
-        res.status(500).json({ message: "Something went wrong fetching the expenses" });
+        return res.status(500).json({ message: "Something went wrong fetching the expenses" });
     }
 });
 
@@ -210,10 +222,10 @@ router.get("/:year", verifyToken, async (req: Request, res: Response) => {
             }
         });
 
-        res.status(200).json(expenses);
+        return res.status(200).json(expenses);
     } catch (e) {
         console.error(`Error fetching expenses:`, e);
-        res.status(500).json({ message: "Something went wrong fetching the expenses" });
+        return res.status(500).json({ message: "Something went wrong fetching the expenses" });
     }
 });
 
@@ -226,12 +238,17 @@ router.put('/:year/:month/:id', verifyToken, async (req: Request, res: Response)
         //validate year and month
         let startDate = new Date();
         let endDate = new Date();
+        let parsedYear :number;
         try {
             startDate = new Date(parseInt(year), parseInt(month)-1) //Month index starts at 0... :(
             endDate = new Date(parseInt(year), parseInt(month))
+            parsedYear = parseInt(date.split("-")[0]);
+            if(parsedYear < 1970 || parsedYear >9999){
+                return res.status(400).json({message: "Year is invalid, must be between 1970 and 9999"})
+            }
             
         }catch (e){
-            res.status(400).json({message: "Year or month are invalid."})
+            return res.status(400).json({message: "Year or month are invalid."})
             console.error("Error fetching expense. ", e)
             console.error(`startDate:${startDate}, endDate: ${endDate}`);
         }
@@ -286,9 +303,10 @@ router.delete("/:year/:month/:id", verifyToken, async (req: Request, res: Respon
             endDate = new Date(parseInt(year), parseInt(month))
             
         }catch (e){
-            res.status(400).json({message: "Year or month are invalid."})
             console.error("Error fetching expense. ")
             console.error(`startDate:${startDate}, endDate: ${endDate}`);
+            return res.status(400).json({message: "Year or month are invalid."})
+            
         }
         if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
             return res.status(400).json({message: "Year or month are invalid."})
