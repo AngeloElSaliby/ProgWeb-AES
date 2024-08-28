@@ -32,8 +32,8 @@ const Balance: React.FC = () => {
     const userBalances = data.filter((item: UserBalance) => item.with !== 'all');
 
     const hasOwedToOthersData = parseFloat(globalBalance.owedByUser) > 0 || parseFloat(globalBalance.owedToUser) > 0;
-    const hasOwedToOthersByUserData = userBalances.some((item: UserBalance) => parseFloat(item.balance.owedByUser) > 0);
-    const hasOwedByOthersByUserData = userBalances.some((item: UserBalance) => parseFloat(item.balance.owedToUser) > 0);
+    const hasOwedToOthersByUserData = userBalances.some((item: UserBalance) => parseFloat(item.balance.owedByUser) - parseFloat(item.balance.owedToUser) > 0);
+    const hasOwedByOthersByUserData = userBalances.some((item: UserBalance) => parseFloat(item.balance.owedToUser) - parseFloat(item.balance.owedByUser) > 0);
 
     // Prepare data for the charts
     const chartDataOwedToOthers = {
@@ -57,23 +57,23 @@ const Balance: React.FC = () => {
     };
 
     const chartDataOwedByOthersByUser = {
-        labels: userBalances.filter((item: UserBalance) => parseFloat(item.balance.owedToUser) > 0).map((item: UserBalance) => item.with),
+        labels: userBalances.filter((item: UserBalance) => parseFloat(item.balance.owedToUser)-parseFloat(item.balance.owedByUser)>0).map((item: UserBalance) => item.with),
         datasets: [
             {
                 label: 'Owed by',
-                data: userBalances.filter((item: UserBalance) => parseFloat(item.balance.owedToUser) > 0).map((item: UserBalance) => parseFloat(item.balance.owedToUser)),
-                backgroundColor: userBalances.filter((item: UserBalance) => parseFloat(item.balance.owedToUser) > 0).map((item:UserBalance) => getColor(item.with)), //rescaling to max rgb
+                data: userBalances.filter((item: UserBalance) => parseFloat(item.balance.owedToUser)-parseFloat(item.balance.owedByUser) > 0).map((item: UserBalance) => parseFloat(item.balance.owedToUser)-parseFloat(item.balance.owedByUser)),
+                backgroundColor: userBalances.filter((item: UserBalance) => parseFloat(item.balance.owedToUser)-parseFloat(item.balance.owedByUser)).map((item:UserBalance) => getColor(item.with)), //rescaling to max rgb
             },
         ],
     };
 
     const chartDataOwedToOthersByUser = {
-        labels: userBalances.filter((item: UserBalance) => parseFloat(item.balance.owedByUser) > 0).map((item: UserBalance) => item.with),
+        labels: userBalances.filter((item: UserBalance) => parseFloat(item.balance.owedByUser) - parseFloat(item.balance.owedToUser)  > 0).map((item: UserBalance) => item.with),
         datasets: [
             {
                 label: 'Owed to',
-                data: userBalances.filter((item: UserBalance) => parseFloat(item.balance.owedByUser) > 0).map((item: UserBalance) => parseFloat(item.balance.owedByUser)),
-                backgroundColor: userBalances.filter((item: UserBalance) => parseFloat(item.balance.owedByUser) > 0).map((item:UserBalance) => getColor(item.with)),
+                data: userBalances.filter((item: UserBalance) => parseFloat(item.balance.owedByUser) - parseFloat(item.balance.owedToUser) > 0).map((item: UserBalance) => parseFloat(item.balance.owedByUser) - parseFloat(item.balance.owedToUser)),
+                backgroundColor: userBalances.filter((item: UserBalance) => parseFloat(item.balance.owedByUser) - parseFloat(item.balance.owedToUser)> 0).map((item:UserBalance) => getColor(item.with)),
             },
         ],
     };
@@ -112,11 +112,11 @@ const Balance: React.FC = () => {
                                 </thead>
                                 <tbody>
                                     {userBalances
-                                        .filter((item: UserBalance) => parseFloat(item.balance.owedToUser) > 0)
+                                        .filter((item: UserBalance) => parseFloat(item.balance.owedToUser)-parseFloat(item.balance.owedByUser)>0)
                                         .map((item: UserBalance, index: number) => (
                                             <tr key={index}>
                                                 <td className="border border-gray-300 p-2">{item.with}</td>
-                                                <td className="border border-gray-300 p-2 text-right">{item.balance.owedToUser}</td>
+                                                <td className="border border-gray-300 p-2 text-right">{parseFloat(item.balance.owedToUser)-parseFloat(item.balance.owedByUser)}</td>
                                             </tr>
                                         ))}
                                 </tbody>
@@ -143,11 +143,11 @@ const Balance: React.FC = () => {
                                 </thead>
                                 <tbody>
                                     {userBalances
-                                        .filter((item: UserBalance) => parseFloat(item.balance.owedByUser) > 0)
+                                        .filter((item: UserBalance) => parseFloat(item.balance.owedByUser) - parseFloat(item.balance.owedToUser) > 0)
                                         .map((item: UserBalance, index: number) => (
                                             <tr key={index}>
                                                 <td className="border border-gray-300 p-2">{item.with}</td>
-                                                <td className="border border-gray-300 p-2 text-right">{item.balance.owedByUser}</td>
+                                                <td className="border border-gray-300 p-2 text-right">{parseFloat(item.balance.owedByUser) - parseFloat(item.balance.owedToUser)}</td>
                                             </tr>
                                         ))}
                                 </tbody>
