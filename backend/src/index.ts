@@ -40,7 +40,7 @@ const initializeDB = async () => {
       isConnecting=true;
       db = await connectDB();
   } catch(error) {
-      console.log(error);
+      console.error(error);
   }finally{
     console.log(`DB: Connection attempt ended. Connection successful: ${!!db}`)
     isConnecting= false;

@@ -25,8 +25,6 @@ router.post("/register",[ //express-validator middleware
 
 
     try{
-        console.log('Received registration request:', req.body);
-
         //checking if user exists
         let user = await User.findOne({ 
             email: req.body.email
@@ -38,10 +36,8 @@ router.post("/register",[ //express-validator middleware
         //save user to db
         user = new User(req.body);
         await user.save();
-        console.log('User saved:', user);
 
         //authentication through JWT
-        console.log(process.env.JWT_SECRET_KEY as string);
         const token = jwt.sign({email: user.email}, process.env.JWT_SECRET_KEY as string, 
             {
             expiresIn: "1d"
@@ -51,7 +47,7 @@ router.post("/register",[ //express-validator middleware
             secure: process.env.NODE_ENV === "production", //Standard practice not to use http in production 
             maxAge: 86400000 //1 day in milliseconds
         })
-        console.log('JWT token created:', token);
+
 
 
 
@@ -59,7 +55,7 @@ router.post("/register",[ //express-validator middleware
         res.status(200).json({message: "User registered succesfully"});
 
     } catch (error) {
-        console.log(error);
+        console.error(error);
         res.status(500).send({message: "Something went wrong."});
     }
 })

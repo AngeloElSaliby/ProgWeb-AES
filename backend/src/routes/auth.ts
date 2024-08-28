@@ -19,7 +19,6 @@ router.post("/login", [
     //handle express-validator errors
     const errors = validationResult(req);
     if(!errors.isEmpty()){
-        console.log(errors)
         return res.status(400).json({message: errors.array()[0]});
     }
 
@@ -53,7 +52,7 @@ router.post("/login", [
 
 
     } catch (error){
-        console.log(error);
+        console.error(error);
         res.status(500).json({message: "Something went wrong"}) //Server error
     }
 

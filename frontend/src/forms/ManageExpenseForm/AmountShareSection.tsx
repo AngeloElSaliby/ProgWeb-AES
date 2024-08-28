@@ -25,7 +25,6 @@ const AmountShareSection: React.FC = () => {
             try {
                 
                 const data = await whoami();
-                console.log(data, data.email)
                 setMyUserId(data.email);
                 
             } catch (error) {

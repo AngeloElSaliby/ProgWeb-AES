@@ -4,7 +4,7 @@ import { RegisterFormData } from "./pages/Register";
 import { SignInFormData } from "./pages/SignIn";
 import { updateFormData } from "./forms/ManageChangeForm/ManageChangeForm";
 
-const API_BASE_URL = "/api";
+const API_BASE_URL = "/api";  
 
 export const register = async (formData: RegisterFormData) => {
     const response = await fetch(`${API_BASE_URL}/users/register`, {
@@ -16,7 +16,6 @@ export const register = async (formData: RegisterFormData) => {
         body: JSON.stringify(formData),
     });
     const responseBody = await response.json();
-    console.log(responseBody);
 
     if (!response.ok) {
         throw new Error(responseBody.message); // We configured this so that all errors are in message property from backend
@@ -105,8 +104,6 @@ export const fetchUsers = async () => {
 };
 
 export const submitExpense = async (formData: ExpenseFormData) => {
-    console.log("In submitExpenses")
-    console.log(`Fetching from : ${API_BASE_URL}/budget`)
     const response = await fetch(`${API_BASE_URL}/budget`, {
         method: 'POST',
         headers: {
@@ -151,7 +148,7 @@ export const fetchExpenses = async (query: string = '', year: string = '', month
         const errorText = await response.text();
         try {
             const errorJson = JSON.parse(errorText);
-            console.log(errorJson);
+            console.error(errorJson);
             throw new Error(errorJson.message || 'Unknown error');
         } catch {
             throw new Error('Failed to parse error response');
@@ -176,7 +173,7 @@ export const updateExpense = async (updatedData: updateFormData): Promise<Expens
     });
 
     if (!response.ok) {
-        console.log(response)
+        console.error(response)
         throw new Error('Failed to update expense');
     }
 
@@ -195,7 +192,7 @@ export const deleteExpense = async (updatedData: updateFormData): Promise<Expens
     });
 
     if (!response.ok) {
-        console.log(response)
+        console.error(response)
         throw new Error('Failed to delete expense');
     }
 

@@ -46,7 +46,7 @@ router.post("/",
 
             //catch db errors and formulate response accordingly, now some invalid requests give a 500 status
         } catch (e) { 
-            console.log("Error creating expense:", e);
+            console.error("Error creating expense:", e);
             res.status(500).json({ message: "Something went wrong creating the expense" });
         }
     }
@@ -73,7 +73,6 @@ router.get("/", verifyToken, async (req: Request, res: Response) => {
 
 router.get('/search', verifyToken, async (req: Request, res: Response) => {
     const {q} = req.query;
-    console.log(`Got a get request on /search?=${q}`)
 
     // Error if no query parameter is provided
     if (!q || typeof q !== 'string') {
@@ -122,10 +121,14 @@ router.get("/:year/:month/:id", verifyToken, async (req: Request, res: Response)
             endDate = new Date(parseInt(year), parseInt(month))
             
         }catch (e){
-            console.log(`Recieved as year: ${year}, as month: ${month}, as id:${id}. Computed: startDate:${startDate}, endDate: ${endDate}`);
-            console.log(e);
+            console.error(`Recieved as year: ${year}, as month: ${month}, as id:${id}. Computed: startDate:${startDate}, endDate: ${endDate}`);
+            console.error(e);
             res.status(400).json({message: "Year or month are invalid."});
         }
+        if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+            return res.status(400).json({message: "Year or month are invalid."})
+        }
+
         // Find the expense by ID and ensure it's in the correct month and year
         const expense = await Expense.findOne({
             _id: id,
@@ -156,10 +159,14 @@ router.get("/:year/:month", verifyToken, async (req: Request, res: Response) => 
         try {
             startDate = new Date(parseInt(year), parseInt(month)-1) //Month index starts at 0... :(
             endDate = new Date(parseInt(year), parseInt(month))
-            console.log(`startDate:${startDate}, endDate: ${endDate}`);
         }catch (e){
-            res.status(400).json({message: "Year or month are invalid."})
-            console.log("Error fetching expense. ")
+            console.error("Error fetching expense. ", e)
+             
+            
+        }
+
+        if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+            return res.status(400).json({message: "Year or month are invalid."})
         }
         // Find the expense by ID and ensure it's in the correct month and year
         const expenses = await Expense.find({
@@ -194,8 +201,6 @@ router.get("/:year", verifyToken, async (req: Request, res: Response) => {
         // Set endDate to December 31st of the given year
         const endDate = new Date(parsedYear+1,0,0); // December is month 11
 
-        console.log(`startDate: ${startDate}, endDate: ${endDate}`);
-
         // Find expenses for the entire year
         const expenses = await Expense.find({
             "others.email": req.email, // Ensure the expense belongs to the logged-in user
@@ -227,9 +232,13 @@ router.put('/:year/:month/:id', verifyToken, async (req: Request, res: Response)
             
         }catch (e){
             res.status(400).json({message: "Year or month are invalid."})
-            console.log("Error fetching expense. ")
-            console.log(`startDate:${startDate}, endDate: ${endDate}`);
+            console.error("Error fetching expense. ", e)
+            console.error(`startDate:${startDate}, endDate: ${endDate}`);
         }
+        if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+            return res.status(400).json({message: "Year or month are invalid."})
+        }
+
         // Find the expense by ID and ensure it's in the correct month and year
         const expense = await Expense.findOne({
             _id: id,
@@ -278,9 +287,13 @@ router.delete("/:year/:month/:id", verifyToken, async (req: Request, res: Respon
             
         }catch (e){
             res.status(400).json({message: "Year or month are invalid."})
-            console.log("Error fetching expense. ")
-            console.log(`startDate:${startDate}, endDate: ${endDate}`);
+            console.error("Error fetching expense. ")
+            console.error(`startDate:${startDate}, endDate: ${endDate}`);
         }
+        if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+            return res.status(400).json({message: "Year or month are invalid."})
+        }
+        
         // Find the expense by ID and ensure it's in the correct month and year
         const expense = await Expense.findOneAndDelete({
             _id: id,

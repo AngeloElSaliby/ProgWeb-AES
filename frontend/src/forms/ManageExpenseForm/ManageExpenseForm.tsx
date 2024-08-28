@@ -45,7 +45,6 @@ const ManageExpenseForm = () => {
 
     const onSubmit: SubmitHandler<ExpenseFormData> = (data) => {
 
-        console.log(data);
 
         // Sum the 'amount' values from the 'others' array
         const shares_total = data.others.reduce((sum, currentValue) => {
@@ -65,7 +64,6 @@ const ManageExpenseForm = () => {
             }
     
             // Validate duplicate users
-            data.others.map(share => console.log(share.email, share))
             const uniqueUserIds = new Set(data.others.map((share) => share.email));
             if (uniqueUserIds.size !== data.others.length) {
                 showToast({ message: 'Duplicate users are not allowed in the shares', type: 'ERROR' });

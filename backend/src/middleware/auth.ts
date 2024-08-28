@@ -22,7 +22,7 @@ const verifyToken = (req: Request, res:Response, next: NextFunction) =>{
         req.email = (decoded as JwtPayload).email
         next();
     }catch(error){
-        console.log(error);
+        console.error(error);
         return res.status(401).json({message: "unauthorized"})
     }
 }

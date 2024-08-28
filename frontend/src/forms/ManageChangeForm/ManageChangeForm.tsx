@@ -19,7 +19,6 @@ export type updateFormData = {
 };
 const ManageChangeForm = (initialData:ExpenseType) => {
     const date = typeof initialData.date === 'string' ? new Date(initialData.date) : initialData.date;
-    console.log(initialData.date);
 
     const formMethods = useForm<updateFormData>({
         defaultValues: {

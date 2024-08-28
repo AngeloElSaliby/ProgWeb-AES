@@ -2,6 +2,7 @@ version: '3.8'
 
 services:
   backend:
+    container_name: backendElSaliby
     build:
       context: .
       dockerfile: Dockerfile
@@ -14,6 +15,7 @@ services:
       - mongo
 
   mongo:
+    container_name: mongoElSaliby
     image: mongo:6
     ports:
       - "27017:27017"
